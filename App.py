@@ -1,12 +1,14 @@
 # Import Libraries
+import csv
+
 import dash
-import dash_table
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output, State
+import dash_table
 import mysql.connector as mysql
 import pandas as pd
-import csv
+from dash.dependencies import Input, Output, State
 
 # read CSV file into dataframe
 df = pd.read_csv('Exercises.csv')
@@ -37,6 +39,56 @@ app = dash.Dash(suppress_callback_exceptions=True)
 app.layout = html.Div([
     html.H1('Workout Dashboard', style={'textAlign': 'center'}),
 
+    dcc.Dropdown(id="dropdown", options=[
+        {'label': 'Abdominals', 'value': ' abdominals'},
+        {'label': 'Abductors', 'value': ' adductors'},
+        {'label': 'Quadriceps', 'value': ' quadriceps'},
+        {'label': 'Shoulders', 'value': ' shoulders'},
+        {'label': 'Chest', 'value': ' chest'},
+        {'label': 'Biceps', 'value': ' biceps'},
+        {'label': 'Calves', 'value': ' calves'},
+        {'label': 'Glutes', 'value': ' glutes'},
+        {'label': 'Middle back', 'value': ' middle back'},
+        {'label': 'Hamstrings', 'value': ' hamstrings'},
+        {'label': 'Lower back', 'value': ' lower back'}
+    ],
+                 multi=True,
+                 style={
+                     'color': 'Primary'
+                 },
+                 value='abdominals',
+                 placeholder='Select Muscle Groups'
+                 ),
+    dcc.Input(
+        id="input2", type="number", placeholder="*WIP*Days Per Week", min=0, max=7
+    ),
+
+    html.Button(id='submit-button',
+                children='Submit'
+                ),
+
+    dash_table.DataTable(
+        id="Workout",
+        columns=[{'name': i, 'id': i} for i in df.columns],
+        style_as_list_view=True,
+        style_data={'border': '1px solid blue'},
+        style_data_conditional=[
+            {
+                'if': {'row_index': 'odd'},
+                'backgroundColor': 'rgb(230, 230, 230)'}
+        ],
+        style_header={
+            'backgroundColor': 'rgb(230, 230, 230)',
+            'fontWeight': 'bold',
+            'textAlign': 'center',
+            'border': '1px solid blue'
+        },
+        style_cell={
+            'height': 'auto',
+            'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
+            'whiteSpace': 'normal',
+            'textAlign': 'center'},
+    ),
     dash_table.DataTable(
         id='table',
         columns=[{'name': i, 'id': i} for i in df.columns],
@@ -44,6 +96,8 @@ app.layout = html.Div([
         style_as_list_view=True,
         page_size=10,
         filter_action='native',
+        style_data={'border': '1px solid blue',
+                    },
         style_data_conditional=[
             {
                 'if': {'row_index': 'odd'},
@@ -52,7 +106,8 @@ app.layout = html.Div([
         style_header={
             'backgroundColor': 'rgb(230, 230, 230)',
             'fontWeight': 'bold',
-            'textAlign': 'center'
+            'textAlign': 'center',
+            'border': '1px solid blue'
         },
         style_cell={
             'height': 'auto',
@@ -60,49 +115,6 @@ app.layout = html.Div([
             'whiteSpace': 'normal',
             'textAlign': 'left'}
     ),
-
-    html.Button(id='submit-button',
-                children='Submit'
-                ),
-
-    dcc.Dropdown(id="dropdown", options=[
-        {'label': 'abdominals', 'value': ' abdominals'},
-        {'label': 'abductors', 'value': ' adductors'},
-        {'label': 'quadriceps', 'value': ' quadriceps'},
-        {'label': 'shoulders', 'value': ' shoulders'},
-        {'label': 'chest', 'value': ' chest'},
-        {'label': 'biceps', 'value': ' biceps'},
-        {'label': 'calves', 'value': ' calves'},
-        {'label': 'glutes', 'value': ' glutes'},
-        {'label': 'middle back', 'value': ' middle back'},
-        {'label': 'hamstrings', 'value': ' hamstrings'},
-        {'label': 'lower back', 'value': ' lower back'}
-    ],
-                 multi=True,
-                 value='abdominals',
-                 placeholder='Select Muscle Groups'
-                 ),
-    dcc.Input(id="input2", type="number", placeholder="# of Days Per Week", min=0, max=7),
-    dash_table.DataTable(
-        id="Workout",
-        columns=[{'name': i, 'id': i} for i in df.columns],
-        style_as_list_view=True,
-        style_data_conditional=[
-            {
-                'if': {'row_index': 'odd'},
-                'backgroundColor': 'rgb(248, 248, 248)'}
-        ],
-        style_header={
-            'backgroundColor': 'rgb(230, 230, 230)',
-            'fontWeight': 'bold',
-            'textAlign': 'center'
-        },
-        style_cell={
-            'height': 'auto',
-            'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
-            'whiteSpace': 'normal',
-            'textAlign': 'left'}
-    )
 ])
 
 
@@ -112,9 +124,8 @@ app.layout = html.Div([
     [State('dropdown', 'value')])
 def create_workout(n_clicks, value):
     if n_clicks is not None:
-        for i in value:
-            dff = df[df['muscle'] == i]
-            return dff.to_dict('records')
+        dff = pd.DataFrame(df[df['muscle'].isin(value)])
+        return dff.to_dict('records')
 
 
 if __name__ == '__main__':
