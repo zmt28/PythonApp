@@ -1,6 +1,6 @@
 # Import Libraries
 import csv
-
+import urllib
 import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -67,6 +67,12 @@ app.layout = html.Div([
                 children='Submit'
                 ),
 
+    html.Div([html.P(' ')
+                 , html.A('Download CSV', id='my-link', download="data.csv",
+                          href="",
+                          target="_blank")
+              ]),
+
     dash_table.DataTable(
         id="Workout",
         columns=[{'name': i, 'id': i} for i in df.columns],
@@ -114,7 +120,7 @@ app.layout = html.Div([
             'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
             'whiteSpace': 'normal',
             'textAlign': 'left'}
-    ),
+    )
 ])
 
 
@@ -126,6 +132,18 @@ def create_workout(n_clicks, value):
     if n_clicks is not None:
         dff = pd.DataFrame(df[df['muscle'].isin(value)])
         return dff.to_dict('records')
+
+
+@app.callback(
+    Output('my-link', 'href'),
+    [Input('submit-button', 'n_clicks')],
+    [State('dropdown', 'value')])
+def csv_dwn(n_clicks, value):
+    if n_clicks is not None:
+        dff = pd.DataFrame(df[df['muscle'].isin(value)])
+        csv_string = dff.to_csv(index=False, encoding='utf-8')
+        csv_string = "data:text/csv;charset=utf-8,%EF%BB%BF" + urllib.parse.quote(csv_string)
+        return csv_string
 
 
 if __name__ == '__main__':
