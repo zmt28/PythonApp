@@ -34,10 +34,10 @@ with open('Exercises.csv') as f:
 records = cursor.fetchall()
 
 app = dash.Dash(suppress_callback_exceptions=True)
-
+header = dcc.Markdown('🏃🚴 Workout Dashboard 🏋️💪')
 # Define HTML Component
 app.layout = html.Div([
-    html.H1('Workout Dashboard', style={'textAlign': 'center'}),
+    html.H1(header, style={'textAlign': 'center'}),
 
     dcc.Dropdown(id="dropdown", options=[
         {'label': 'Abdominals', 'value': ' abdominals'},
@@ -60,7 +60,7 @@ app.layout = html.Div([
                  placeholder='Select Muscle Groups'
                  ),
     dcc.Input(
-        id="input2", type="number", placeholder="*WIP*Days Per Week", min=0, max=7
+        id="input2", type="number", placeholder="# of Days Per Week", min=1, max=7
     ),
 
     html.Button(id='submit-button',
@@ -127,10 +127,12 @@ app.layout = html.Div([
 @app.callback(
     Output('Workout', 'data'),
     [Input('submit-button', 'n_clicks')],
-    [State('dropdown', 'value')])
-def create_workout(n_clicks, value):
+    [State('dropdown', 'value'),
+     State('input2', 'value')])
+def create_workout(n_clicks, dropdown, input2):
     if n_clicks is not None:
-        dff = pd.DataFrame(df[df['muscle'].isin(value)])
+        dff = pd.DataFrame(df[df['muscle'].isin(dropdown)])
+        dff = dff.head(input2 *5)
         return dff.to_dict('records')
 
 
