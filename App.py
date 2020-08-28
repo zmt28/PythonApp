@@ -21,7 +21,7 @@ with open('Exercises.csv') as f:
     db = mysql.connect(
         host="localhost",
         user="root",
-        passwd="bunny564",
+        passwd="password_here",
         database='Summer_Project'
     )
     # Initialize Cursor
