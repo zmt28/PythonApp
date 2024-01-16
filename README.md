@@ -1,6 +1,5 @@
 ## Summer Project 
-**Joseph Duncan 
-Zion Taber**
+**Zion Taber**
 
 The purpose of this project is to create a web program that increases the mental toughness of its members. 
 It will do this through  providing users with randomized workouts based on maximum and minimum lengths of the workout.
